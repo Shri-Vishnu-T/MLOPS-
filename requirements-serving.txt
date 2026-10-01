@@ -1,0 +1,11 @@
+# Minimal runtime dependencies for the FastAPI container.
+numpy>=2.0,<3.0
+pandas>=2.2,<3.0
+scikit-learn>=1.5,<2.0
+joblib>=1.4,<2.0
+PyYAML>=6.0,<7.0
+mlflow>=3.14,<4.0
+xgboost>=3.2,<3.3
+fastapi>=0.139,<1.0
+uvicorn>=0.51,<1.0
+prometheus-client>=0.25,<1.0

@@ -1,0 +1,126 @@
+project:
+  name: intelligent-loan-approval-and-credit-limit-recommendation
+  random_seed: 42
+
+paths:
+  raw_data: data/raw
+  interim_data: data/interim
+  processed_data: data/processed
+  model_artifacts: models
+  reports: reports
+  figures: reports/figures
+
+data_split:
+  test_size: 0.20
+  validation_size: 0.10
+  stratify_approval_target: true
+
+validation:
+  minimum_age: 18
+  maximum_age: 100
+
+targets:
+  loan_approval: loan_status
+  credit_limit_original: LIMIT_BAL
+  credit_limit: LIMIT_BAL_INR
+
+currency:
+  source: TWD
+  target: INR
+  exchange_rate: 2.99
+  reference_date: "2026-07-23"
+  display_symbol: "₹"
+  display_rounding: 1000
+
+approval_model:
+  decision_threshold: 0.50
+  primary_metric: roc_auc
+  reporting_metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1
+    - roc_auc
+
+credit_limit_model:
+  approved_applicants_only: true
+  primary_metric: mean_absolute_error
+  reporting_metrics:
+    - mean_absolute_error
+    - root_mean_squared_error
+    - r2
+
+baseline_training:
+  classification:
+    cross_validation_folds: 5
+    cross_validation_metric: roc_auc
+    logistic_regression:
+      max_iter: 2000
+      class_weight: balanced
+      solver: lbfgs
+    random_forest:
+      n_estimators: 200
+      max_depth: 18
+      min_samples_leaf: 2
+      max_features: sqrt
+      class_weight: balanced
+  regression:
+    cross_validation_folds: 5
+    cross_validation_metric: neg_root_mean_squared_error
+    random_forest:
+      n_estimators: 150
+      max_depth: 18
+      min_samples_leaf: 2
+      max_features: sqrt
+
+mlflow:
+  tracking_uri: "sqlite:///mlflow.db"
+  artifact_location: "mlruns"
+  loan_experiment: "loan-approval-classification"
+  credit_experiment: "credit-limit-regression"
+  loan_registered_model: "loan-approval-xgboost"
+  credit_registered_model: "credit-limit-xgboost-inr"
+
+xgboost_training:
+  model_version: "untuned-v1"
+  classification:
+    n_estimators: 250
+    max_depth: 4
+    learning_rate: 0.05
+    subsample: 0.90
+    colsample_bytree: 0.90
+    min_child_weight: 1
+    reg_lambda: 1.0
+    objective: binary:logistic
+    eval_metric: logloss
+    tree_method: hist
+    use_balanced_scale_pos_weight: true
+  regression:
+    n_estimators: 300
+    max_depth: 5
+    learning_rate: 0.05
+    subsample: 0.90
+    colsample_bytree: 0.90
+    min_child_weight: 1
+    reg_lambda: 1.0
+    objective: reg:squarederror
+    eval_metric: rmse
+    tree_method: hist
+
+serving:
+  application_name: "Intelligent Loan and Credit Limit API"
+  application_version: "1.0.0"
+  loan_model_path: "models/final/loan_xgboost_pipeline.joblib"
+  credit_model_path: "models/final/credit_limit_xgboost_pipeline.joblib"
+  mlflow_alias: "candidate"
+  allow_mlflow_fallback: true
+  loan_positive_label: "Approved"
+  loan_negative_label: "Rejected"
+
+monitoring:
+  metric_namespace: "loan_credit_mlops"
+
+dvc:
+  loan_metrics_path: "reports/metrics/loan_metrics.json"
+  credit_metrics_path: "reports/metrics/credit_limit_metrics.json"
+  validation_metrics_path: "reports/metrics/validation_metrics.json"

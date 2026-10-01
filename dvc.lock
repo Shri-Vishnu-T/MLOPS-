@@ -1,0 +1,276 @@
+schema: '2.0'
+stages:
+  validation:
+    cmd: .venv\Scripts\python.exe scripts\run_validation.py
+    deps:
+    - path: data/raw/credit_limit/default of credit card clients.xls
+      hash: md5
+      md5: 123bd20ecabeb6eaaf25e079376b8bb7
+      size: 5539328
+    - path: data/raw/loan/loan_data.csv
+      hash: md5
+      md5: c13802044748773e03486b5d349d0dcc
+      size: 3610978
+    - path: params.yaml
+      hash: md5
+      md5: 4a1e2789cca44c234cfa9eab1a8ef976
+      size: 3008
+    - path: scripts/run_validation.py
+      hash: md5
+      md5: 60356358f38fbdb5c62075335c567fe9
+      size: 2419
+    - path: src/data/load_data.py
+      hash: md5
+      md5: f65a5b2282baa4c8fa121d7da5d36bcd
+      size: 7495
+    - path: src/data/validate_credit_data.py
+      hash: md5
+      md5: 80e5cbca26c46d9e18b99c5af130c093
+      size: 7166
+    - path: src/data/validate_loan_data.py
+      hash: md5
+      md5: b191f50618100f24b7acd7c05006b625
+      size: 5136
+    params:
+      params.yaml:
+        validation.maximum_age: 100
+        validation.minimum_age: 18
+    outs:
+    - path: reports/metrics/validation_metrics.json
+      hash: md5
+      md5: 301f5b7a2b365e94b69322ba055ce02f
+      size: 557
+  preprocessing:
+    cmd: .venv\Scripts\python.exe scripts\run_preprocessing.py
+    deps:
+    - path: data/raw/credit_limit/default of credit card clients.xls
+      hash: md5
+      md5: 123bd20ecabeb6eaaf25e079376b8bb7
+      size: 5539328
+    - path: data/raw/loan/loan_data.csv
+      hash: md5
+      md5: c13802044748773e03486b5d349d0dcc
+      size: 3610978
+    - path: params.yaml
+      hash: md5
+      md5: 4a1e2789cca44c234cfa9eab1a8ef976
+      size: 3008
+    - path: scripts/run_preprocessing.py
+      hash: md5
+      md5: a07e2de66b928e3d0b078cb1258b2159
+      size: 2580
+    - path: src/data/load_data.py
+      hash: md5
+      md5: f65a5b2282baa4c8fa121d7da5d36bcd
+      size: 7495
+    - path: src/data/validate_credit_data.py
+      hash: md5
+      md5: 80e5cbca26c46d9e18b99c5af130c093
+      size: 7166
+    - path: src/data/validate_loan_data.py
+      hash: md5
+      md5: b191f50618100f24b7acd7c05006b625
+      size: 5136
+    - path: src/features/preprocess_credit.py
+      hash: md5
+      md5: f445f1540251484dea823db740ef333c
+      size: 11010
+    - path: src/features/preprocess_loan.py
+      hash: md5
+      md5: 74c1da0ad5e50b81e0492f03f7fbb28d
+      size: 7571
+    params:
+      params.yaml:
+        currency.exchange_rate: 2.99
+        data_split.test_size: 0.2
+        project.random_seed: 42
+        validation.maximum_age: 100
+        validation.minimum_age: 18
+    outs:
+    - path: data/processed/credit_limit
+      hash: md5
+      md5: 2938566a9bbd03a71f0bf5fceb0444e2.dir
+      size: 21042495
+      nfiles: 6
+    - path: data/processed/loan
+      hash: md5
+      md5: 716d6cd60daded073856d3d4b088d032.dir
+      size: 14373399
+      nfiles: 6
+  training:
+    cmd: .venv\Scripts\python.exe scripts\export_final_models.py 
+      --allow-training-fallback
+    deps:
+    - path: data/processed/credit_limit
+      hash: md5
+      md5: 2938566a9bbd03a71f0bf5fceb0444e2.dir
+      size: 21042495
+      nfiles: 6
+    - path: data/processed/loan
+      hash: md5
+      md5: 716d6cd60daded073856d3d4b088d032.dir
+      size: 14373399
+      nfiles: 6
+    - path: params.yaml
+      hash: md5
+      md5: 4a1e2789cca44c234cfa9eab1a8ef976
+      size: 3008
+    - path: reports/mlflow_experiment_report.md
+      hash: md5
+      md5: 2d74023bce044b6ebef6bdf8c5967548
+      size: 15966
+    - path: scripts/export_final_models.py
+      hash: md5
+      md5: b97c17df2e519a77c0ec58ca2d110fe0
+      size: 1419
+    - path: src/models/final_artifacts.py
+      hash: md5
+      md5: 4d841b8b0f96b43ef61a07a24a16eaa8
+      size: 10281
+    - path: src/models/train_credit_baseline.py
+      hash: md5
+      md5: 260f6afec914b641326200aa573f1702
+      size: 6202
+    - path: src/models/train_loan_baseline.py
+      hash: md5
+      md5: 80123820b107bd869d72613f5d9c35f4
+      size: 5697
+    - path: src/tracking/mlflow_utils.py
+      hash: md5
+      md5: acabf8879971d194cf23b386596422bc
+      size: 10509
+    params:
+      params.yaml:
+        data_split.test_size: 0.2
+        mlflow:
+          tracking_uri: sqlite:///mlflow.db
+          artifact_location: mlruns
+          loan_experiment: loan-approval-classification
+          credit_experiment: credit-limit-regression
+          loan_registered_model: loan-approval-xgboost
+          credit_registered_model: credit-limit-xgboost-inr
+        project.random_seed: 42
+        serving:
+          application_name: Intelligent Loan and Credit Limit API
+          application_version: 1.0.0
+          loan_model_path: models/final/loan_xgboost_pipeline.joblib
+          credit_model_path: models/final/credit_limit_xgboost_pipeline.joblib
+          mlflow_alias: candidate
+          allow_mlflow_fallback: true
+          loan_positive_label: Approved
+          loan_negative_label: Rejected
+        xgboost_training:
+          model_version: untuned-v1
+          classification:
+            n_estimators: 250
+            max_depth: 4
+            learning_rate: 0.05
+            subsample: 0.9
+            colsample_bytree: 0.9
+            min_child_weight: 1
+            reg_lambda: 1.0
+            objective: binary:logistic
+            eval_metric: logloss
+            tree_method: hist
+            use_balanced_scale_pos_weight: true
+          regression:
+            n_estimators: 300
+            max_depth: 5
+            learning_rate: 0.05
+            subsample: 0.9
+            colsample_bytree: 0.9
+            min_child_weight: 1
+            reg_lambda: 1.0
+            objective: reg:squarederror
+            eval_metric: rmse
+            tree_method: hist
+    outs:
+    - path: models/final/credit_limit_xgboost_pipeline.joblib
+      hash: md5
+      md5: 945399d099920b340c4fcdb2dd82bf57
+      size: 804874
+    - path: models/final/loan_xgboost_pipeline.joblib
+      hash: md5
+      md5: 7ccf01590685e2edc83600b088432e34
+      size: 370292
+    - path: reports/metrics/model_export.json
+      hash: md5
+      md5: 23e135588baa79d8f0f2aedef373d708
+      size: 2252
+  evaluation:
+    cmd: .venv\Scripts\python.exe scripts\evaluate_final_models.py
+    deps:
+    - path: data/processed/credit_limit
+      hash: md5
+      md5: 2938566a9bbd03a71f0bf5fceb0444e2.dir
+      size: 21042495
+      nfiles: 6
+    - path: data/processed/loan
+      hash: md5
+      md5: 716d6cd60daded073856d3d4b088d032.dir
+      size: 14373399
+      nfiles: 6
+    - path: data/raw/credit_limit/default of credit card clients.xls
+      hash: md5
+      md5: 123bd20ecabeb6eaaf25e079376b8bb7
+      size: 5539328
+    - path: data/raw/loan/loan_data.csv
+      hash: md5
+      md5: c13802044748773e03486b5d349d0dcc
+      size: 3610978
+    - path: models/final/credit_limit_xgboost_pipeline.joblib
+      hash: md5
+      md5: 945399d099920b340c4fcdb2dd82bf57
+      size: 804874
+    - path: models/final/loan_xgboost_pipeline.joblib
+      hash: md5
+      md5: 7ccf01590685e2edc83600b088432e34
+      size: 370292
+    - path: params.yaml
+      hash: md5
+      md5: 4a1e2789cca44c234cfa9eab1a8ef976
+      size: 3008
+    - path: scripts/evaluate_final_models.py
+      hash: md5
+      md5: ce12eece61764f1ac15de2274e3dc93a
+      size: 3330
+    - path: src/evaluation/evaluate_classification.py
+      hash: md5
+      md5: caa54e7014489168d7608ebe212692f9
+      size: 7665
+    - path: src/evaluation/evaluate_regression.py
+      hash: md5
+      md5: 53f8d517f6217dafbdd3f6bfd3bd20f2
+      size: 6646
+    - path: src/models/final_artifacts.py
+      hash: md5
+      md5: 4d841b8b0f96b43ef61a07a24a16eaa8
+      size: 10281
+    - path: src/tracking/mlflow_utils.py
+      hash: md5
+      md5: acabf8879971d194cf23b386596422bc
+      size: 10509
+    params:
+      params.yaml:
+        data_split.test_size: 0.2
+        dvc.credit_metrics_path: reports/metrics/credit_limit_metrics.json
+        dvc.loan_metrics_path: reports/metrics/loan_metrics.json
+        project.random_seed: 42
+        serving:
+          application_name: Intelligent Loan and Credit Limit API
+          application_version: 1.0.0
+          loan_model_path: models/final/loan_xgboost_pipeline.joblib
+          credit_model_path: models/final/credit_limit_xgboost_pipeline.joblib
+          mlflow_alias: candidate
+          allow_mlflow_fallback: true
+          loan_positive_label: Approved
+          loan_negative_label: Rejected
+    outs:
+    - path: reports/metrics/credit_limit_metrics.json
+      hash: md5
+      md5: 9fcd0b890f67e1a85c7ba81e9c01064b
+      size: 375
+    - path: reports/metrics/loan_metrics.json
+      hash: md5
+      md5: 30c6b9f3ab68eb5bcef8b2956ef8aed7
+      size: 362

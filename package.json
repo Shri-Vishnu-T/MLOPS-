@@ -1,0 +1,9 @@
+{
+  "name": "adaptive-lending-frontend-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:frontend": "node --test tests/frontend-contract.test.js",
+    "check:frontend": "node --check frontend/app.js && node --check frontend/model-contract.js && node --check frontend/profile-scene.js"
+  }
+}

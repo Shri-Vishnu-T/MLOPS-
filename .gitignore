@@ -1,0 +1,75 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Packaging and build output
+build/
+dist/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Environment variables, credentials, and local overrides
+.env
+.env.*
+!.env.example
+secrets/
+secrets.*
+!secrets.example
+*.secret
+*.pem
+*.key
+
+# Logs and temporary files
+*.log
+*.tmp
+tmp/
+.test-tmp/
+
+# Local datasets (DVC pointer files remain versionable)
+data/raw/**/*.csv
+data/raw/**/*.xls
+data/raw/**/*.xlsx
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Generated model artifacts
+models/*
+!models/final/
+models/final/*
+!models/final/.gitkeep
+*.joblib
+*.pkl
+*.onnx
+
+# Generated reports and figures
+reports/figures/*
+!reports/figures/.gitkeep
+
+# Tool-specific local state reserved for later stages
+mlruns/
+mlartifacts/
+mlflow.db
+mlflow.db-shm
+mlflow.db-wal
+.dvc/cache/
